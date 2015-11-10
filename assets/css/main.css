@@ -1,0 +1,13 @@
+body { font-family: Roboto, Helvetica, Arial, sans-serif; }
+table { text-align: left; }
+thead tr,
+tfoot tr { background: #900; color: #fff; }
+th,
+td { padding: 0.5em 1em; }
+th[scope=row] { padding: 0; }
+.refreshButton { display: inline-block; margin: 1em 0; padding: 0.5em 1em; background: #111; color: #fff; cursor: hand; }
+.unavailable { color: #fff; background: #f00;}
+a { display: block; padding: 0.5em 1em; color: #900; text-decoration: none; transition: background-color 1s, color 1s;}
+a:hover,
+a:focus { color: #111; background-color: yellow; }
+.results { display: none; }
