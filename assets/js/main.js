@@ -30,6 +30,7 @@ itunesRatings.main = (function(){
             e.preventDefault();
             checkAppID($('input[name=appID]').val());
             checkAppName($('input[name=appName]').val());
+            checkAppURL($('input[name=appURL]').val());
             buildTable(countries);
         });
 
@@ -52,10 +53,19 @@ itunesRatings.main = (function(){
         // console.log('App name = '+itunesRatings.main.appName);
     }
 
+    function checkAppURL(url){
+        //https://itunes.apple.com/cz/app/new-happy-studio/id1030805441?mt=8
+        var re = new RegExp("^https?:\/\/itunes.apple.com\/[a-zA-Z]{2}\/app\/([a-zA-Z-]*)\/id([0-9]*)?.*$");
+        var parsedURL = re.exec(url);
+        itunesRatings.main.appName = parsedURL[1];
+        itunesRatings.main.appID = parsedURL[2];
+    }
+
     function buildTable(countries){
+        $('.result-row').remove();
         for (var i = 0; i < countries.length; i++) {
             var countryCode = countries[i].code.toLowerCase();
-            $("#resultsTable tbody").append('<tr><th scope="row"><a href="https://itunes.apple.com/'+countryCode+'/app/'+itunesRatings.main.appName+'/id'+itunesRatings.main.appID+'?mt=8">'+countries[i].name+'</a></th><td class="result" id="result_'+countryCode+'" data-country="'+countryCode+'">Loading...</td></tr>');
+            $("#resultsTable tbody").append('<tr class="result-row"><th scope="row"><a href="https://itunes.apple.com/'+countryCode+'/app/'+itunesRatings.main.appName+'/id'+itunesRatings.main.appID+'?mt=8">'+countries[i].name+'</a></th><td class="result" id="result_'+countryCode+'" data-country="'+countryCode+'">Loading...</td></tr>');
         }
         $('.results').show();
         fetchRatings();
@@ -70,17 +80,20 @@ itunesRatings.main = (function(){
 
     function getRating(countryCode, appID, appName){
         var url = "https://itunes.apple.com/"+countryCode+"/app/"+appName+"/id"+appID+"?mt=8 span[itemprop=ratingValue]";
-        console.log("Getting rating from "+url);
+        // console.log("Getting rating from "+url);
         $( "#result_"+countryCode ).load( url, function( response, status, xhr ){
             if (status == "error") {
-                console.log("Error response from "+url);
+                // console.log("Error response from "+url);
                 // console.log(response);
                 $( this ).html("N/A").addClass('unavailable');
             } else {
-                console.log("Got a response from "+url);
+                // console.log("Got a response from "+url);
                 // console.log(response);
                 var rating = $( this ).find("span").first().text();
                 $( this ).html(rating).addClass('fetched');
+                if(rating == "") {
+                    $(this).parent().addClass('unavailable');
+                }
 
                 var ratings = [];
                 $('td.fetched').each(function(){
@@ -91,7 +104,7 @@ itunesRatings.main = (function(){
                 });
                 if (ratings.length > 0) {
                     var average = getAvg(ratings);
-                    $("#averageRating").html(average);
+                    $(".averageRating").html(average);
                 }
             }
         });

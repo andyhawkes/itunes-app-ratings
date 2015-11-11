@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>iTunes app ratings</title>
+        <title>Global iTunes app ratings tool</title>
         <script src="https://code.jquery.com/jquery-2.1.4.min.js" type="text/javascript"></script>
         <script src="assets/js/countries.json" type="text/javascript"></script>
         <script src="assets/js/main.js" type="text/javascript"></script>
@@ -9,37 +9,52 @@
     </head>
 
     <body>
-        <h1>iTunes app ratings</h1>
+        <div class="wrapper">
+            <h1>Global iTunes app ratings</h1>
 
-        <section class="requirements">
-            <form action="#" method="GET" id="appDetails">
-                <label for="appID">App ID</label>
-                <input type="text" name="appID" />
-                <label for="appName">App name</label>
-                <input type="text" name="appName" />
-                <button type="submit" class="formSubmit">Go!</button>
-            </form>
-        </section>
+            <section class="requirements">
+                <form action="#" method="GET" id="appDetails">
+                    <fieldset class="search-by-url">
+                        <legend>App store URL</legend>
+                        <label for="appURL">App store URL</label>
+                        <input type="text" name="appURL" placeholder="https://itunes.apple.com/us/app/youtube/id544007664?mt=8" />
+                    </fieldset>
+                    <p>or</p>
+                    <fieldset class="search-by-id">
+                        <legend>App name and ID</legend>
+                        <label for="appID">App ID</label>
+                        <input type="text" name="appID" placeholder="544007664" />
+                        <label for="appName">App name</label>
+                        <input type="text" name="appName" placeholder="youtube" />
+                    </fieldset>
+                    <button type="submit" class="formSubmit">Go!</button>
+                </form>
+            </section>
 
-        <section class="results">
-            <table id="resultsTable">
-                <thead>
-                    <tr>
-                        <th scope="col">Country</th>
-                        <th scope="col">Rating</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <th>Average</th>
-                        <td id="averageRating">Calculating...</td>
-                    </tr>
-                </tfoot>
-            </table>
-            <a href="#" class="refreshButton">Refresh</a>
-        </section>
+            <section class="results">
+                <table id="resultsTable">
+                    <thead>
+                        <tr>
+                            <th>Average</th>
+                            <td class="averageRating">Calculating...</td>
+                        </tr>
+                        <tr>
+                            <th scope="col">Country</th>
+                            <th scope="col" class="centered">Rating</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th>Average</th>
+                            <td class="averageRating">Calculating...</td>
+                        </tr>
+                    </tfoot>
+                </table>
+                <button type="submit" form="appDetails" class="formSubmit">Refresh</button>
+            </section>
+        </div>
     </body>
 
 </html>

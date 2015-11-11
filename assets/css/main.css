@@ -1,13 +1,20 @@
 body { font-family: Roboto, Helvetica, Arial, sans-serif; }
+.wrapper { margin: 0 auto; width: 30em; }
 table { text-align: left; }
 thead tr,
 tfoot tr { background: #900; color: #fff; }
 th,
 td { padding: 0.5em 1em; }
-th[scope=row] { padding: 0; }
-.refreshButton { display: inline-block; margin: 1em 0; padding: 0.5em 1em; background: #111; color: #fff; cursor: hand; }
-.unavailable { color: #fff; background: #f00;}
+td { text-align: center; width: 10em; }
+th[scope=row] { padding: 0; width: 20em; }
+button { display: inline-block; margin: 1em 0; padding: 0.5em 1em; background: #111; color: #fff; cursor: pointer; border: 0;}
+button:hover,
+button:focus { color: #fff; background: #090; transition: background-color 0.5s, color 0.5s; }
+.unavailable { color: #fff; background: #ccc; font-size: 0.7em; transition: background-color 1s, color 1s; }
+.unavailable td { padding: 0.25em 1em ;}
+.unavailable a { color: #999; padding: 0.25em 1.5em; disabled: disabled; }
 a { display: block; padding: 0.5em 1em; color: #900; text-decoration: none; transition: background-color 1s, color 1s;}
 a:hover,
 a:focus { color: #111; background-color: yellow; }
 .results { display: none; }
+.centered { text-align: center; }
