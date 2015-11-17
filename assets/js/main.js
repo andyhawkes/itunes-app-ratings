@@ -31,11 +31,13 @@ itunesRatings.main = (function(){
             checkAppID($('input[name=appID]').val());
             checkAppName($('input[name=appName]').val());
             checkAppURL($('input[name=appURL]').val());
+            $(this).blur();
             buildTable(countries);
         });
 
         $('.refreshButton').on('click',function(e){
             e.preventDefault();
+            $(this).blur();
             refresh();
         });
     }
