@@ -85,14 +85,9 @@ itunesRatings.main = (function(){
         // console.log( "Getting rating for " +countryCode + " from " + url );
         $.get( url, function(data) {
             // console.log( "Retrieved data for " +countryCode );
-            var rating = $(data).find('div.rating').attr('aria-label');
-            var parsedRating = ratingsRegex.exec(rating);
-            rating = (parsedRating && parsedRating.length > 0) ? parsedRating[1] : '0';
-            reviews = (parsedRating && parsedRating.length > 1) ? parsedRating[2] : '0';
-
+            var rating = $(data).find('.customer-ratings div.rating').attr('aria-label');
             var ratingCell = $( "#rating_"+countryCode );
             var reviewsCell = $( "#reviews_"+countryCode );
-            var rating = $(data).find('div.rating').attr('aria-label');
 
             if ( rating != undefined ) {
                 // console.log('Rating found for '+countryCode+' - processing rating & review data...');
