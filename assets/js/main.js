@@ -22,7 +22,9 @@ var itunesRatings = itunesRatings || {};
 itunesRatings.main = (function(){
 
     var appID = "",
-        appName = "";
+        appName = "",
+        urlRegex = new RegExp("^https?:\/\/itunes.apple.com\/[a-zA-Z]{2}\/app\/([a-zA-Z-]*)\/id([0-9]*)?.*$"),
+        ratingsRegex = new RegExp(/([0-9\.]*) [^,]*, ([0-9]*)/);
 
     function init(){
 
@@ -56,9 +58,7 @@ itunesRatings.main = (function(){
     }
 
     function checkAppURL(url){
-        //https://itunes.apple.com/cz/app/new-happy-studio/id1030805441?mt=8
-        var re = new RegExp("^https?:\/\/itunes.apple.com\/[a-zA-Z]{2}\/app\/([a-zA-Z-]*)\/id([0-9]*)?.*$");
-        var parsedURL = re.exec(url);
+        var parsedURL = urlRegex.exec(url);
         itunesRatings.main.appName = parsedURL[1];
         itunesRatings.main.appID = parsedURL[2];
     }
@@ -67,7 +67,7 @@ itunesRatings.main = (function(){
         $('.result-row').remove();
         for (var i = 0; i < countries.length; i++) {
             var countryCode = countries[i].code.toLowerCase();
-            $("#resultsTable tbody").append('<tr class="result-row"><th scope="row"><a href="https://itunes.apple.com/'+countryCode+'/app/'+itunesRatings.main.appName+'/id'+itunesRatings.main.appID+'?mt=8">'+countries[i].name+'</a></th><td class="result" id="result_'+countryCode+'" data-country="'+countryCode+'">Loading...</td></tr>');
+            $("#resultsTable tbody").append('<tr class="result-row"><th scope="row"><a href="https://itunes.apple.com/'+countryCode+'/app/'+itunesRatings.main.appName+'/id'+itunesRatings.main.appID+'?mt=8">'+countries[i].name+'</a></th><td class="result" id="rating_'+countryCode+'" data-country="'+countryCode+'">Loading...</td><td class="result" id="reviews_'+countryCode+'" data-country="'+countryCode+'">Loading...</td></tr>');
         }
         $('.results').show();
         fetchRatings();
@@ -81,25 +81,33 @@ itunesRatings.main = (function(){
     }
 
     function getRating(countryCode, appID, appName){
-        var url = "https://itunes.apple.com/"+countryCode+"/app/"+appName+"/id"+appID+"?mt=8 span[itemprop=ratingValue]";
-        // console.log("Getting rating from "+url);
-        $( "#result_"+countryCode ).load( url, function( response, status, xhr ){
-            if (status == "error") {
-                // console.log("Error response from "+url);
-                // console.log(response);
-                $( this ).html("N/A").addClass('unavailable');
-            } else {
-                // console.log("Got a response from "+url);
-                // console.log(response);
-                var rating = $( this ).find("span").first().text();
-                $( this ).html(rating).addClass('fetched');
-                if(rating == "") {
-                    $(this).parent().addClass('unavailable');
-                }
+        var url = "https://itunes.apple.com/"+countryCode+"/app/"+appName+"/id"+appID+"?mt=8";
+        // console.log( "Getting rating for " +countryCode + " from " + url );
+        $.get( url, function(data) {
+            // console.log( "Retrieved data for " +countryCode );
+            var rating = $(data).find('div.rating').attr('aria-label');
+            var parsedRating = ratingsRegex.exec(rating);
+            rating = (parsedRating && parsedRating.length > 0) ? parsedRating[1] : '0';
+            reviews = (parsedRating && parsedRating.length > 1) ? parsedRating[2] : '0';
+
+            var ratingCell = $( "#rating_"+countryCode );
+            var reviewsCell = $( "#reviews_"+countryCode );
+            var rating = $(data).find('div.rating').attr('aria-label');
+
+            if ( rating != undefined ) {
+                // console.log('Rating found for '+countryCode+' - processing rating & review data...');
+
+                var parsedRating = ratingsRegex.exec(rating);
+                rating = (parsedRating && parsedRating.length > 0) ? parsedRating[1] : '0';
+                reviews = (parsedRating && parsedRating.length > 1) ? parsedRating[2] : '0';
+                ratingCell.html(rating).addClass('rated');
+                reviewsCell.html(reviews).addClass('reviewed');
+                ratingCell.parent().addClass('success');
 
                 var ratings = [];
-                $('td.fetched').each(function(){
+                $('td.rated').each(function(){
                     var theRating = parseFloat($(this).text());
+                    console.log("rating: " + theRating);
                     if(theRating > 0) {
                         ratings.push(theRating);
                     }
@@ -108,13 +116,47 @@ itunesRatings.main = (function(){
                     var average = getAvg(ratings);
                     $(".averageRating").html(average);
                 }
+
+                var reviews = 0;
+                var allReviews = [];
+
+                $('td.reviewed').each(function(){
+                    var thisReviews = parseFloat($(this).text());
+                    if(thisReviews > 0){
+                        reviews += thisReviews;
+                        allReviews.push(thisReviews);
+                    }
+                });
+                if (allReviews.length > 0) {
+                    var average = getAvg(allReviews);
+                    $(".averageReviews").html(average);
+                }
+                $(".totalReviews").html(reviews);
+
+            } else {
+                // console.log('No rating found for '+countryCode+' - marking as unavailable...')
+                var ratingCell = $( "#rating_"+countryCode );
+                var reviewsCell = $( "#reviews_"+countryCode );
+                ratingCell.html("N/A").addClass('unavailable');
+                reviewsCell.html("N/A").addClass('unavailable');
+                ratingCell.parent().addClass('unavailable');
             }
+        }).fail(function() {
+            // alert( "error" );
+            // console.log('No page found for '+countryCode+' - marking as failed...');
+            var ratingCell = $( "#rating_"+countryCode );
+            var reviewsCell = $( "#reviews_"+countryCode );
+            ratingCell.html("Failed").addClass('failed');
+            reviewsCell.html("Failed").addClass('failed');
+            ratingCell.parent().addClass('failed');
         });
     }
 
     function refresh(){
         $('.result').text("Loading...");
-        $("#averageRating").text("Calculating...");
+        $(".averageRating").text("Calculating...");
+        $(".averageReviews").text("Calculating...");
+        $(".totalReviews").text("Calculating...");
         fetchRatings();
     }
 
